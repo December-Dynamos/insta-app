@@ -1,10 +1,25 @@
-import React,{useState} from "react";
+import React,{useState, useContext, useEffect} from "react";
 import axios from "axios"; 
+import UserContext from "../Context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 
-const Signup = ({setToken}) => {
+
+const Signup = () => {
     const [user, setUser] = useState({name:"",email:"",password:"",confirmPassword:""});
     const [message, setMessage] = useState("");
+    const {setToken} = useContext(UserContext);
+
+    const navigate = useNavigate();
+
+      
+      useEffect(()=>{
+            let localTokenJSON = localStorage.getItem("token"); 
+            if(localTokenJSON != undefined){
+                navigate("/dashboard")
+            }
+      },[])
+
 
       function updateUser(e){
           console.log("key",e.target.name)
@@ -38,8 +53,13 @@ const Signup = ({setToken}) => {
                 setMessage(response.data.message)
                 console.log("token",response.data.data.token)
                 setToken(response.data.data.token)
+                // add token to localstorage:
+                let jsonToken = JSON.stringify(response.data.data.token)
+                localStorage.setItem("token", jsonToken )
 
                 setUser({name:"",email:"",password:"",confirmPassword:""})
+
+                setTimeout(()=>navigate("/dashboard"), 2000)
               }
             catch(error){
                 console.log("Error", error.response.data.message)
